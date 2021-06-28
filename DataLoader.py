@@ -146,16 +146,23 @@ if os.path.isfile('train/csv_file.csv') == False:
                                 ,transparent_path= 'train/train_trans.txt'
                                 )
 
-dataset = COSD_Dataset_Loader(rgb_dir_path= 'train/rgb'
-                            , depth_dir_path= 'train/depth'
-                            , csv_file_path= 'train/csv_file.csv'
-                            , transform = transforms.Compose([ToTensor()]))
-print(dataset)
-# print(len(dataset))
-for i in range(3):
-    sample = dataset[i]
-    print(i, sample['rgb_image'].shape,sample['depth_image'].shape, sample['classes'].shape)
+# dataset = COSD_Dataset_Loader(rgb_dir_path= 'train/rgb'
+#                             , depth_dir_path= 'train/depth'
+#                             , csv_file_path= 'train/csv_file.csv'
+#                             , mask_dir_path= 'train/mask'
+#                             , data_type= 'o'
+#                             , transform = transforms.Compose([ToTensor()]))
+# print(dataset)
+# # print(len(dataset))
+# for i in range(3):
+#     sample = dataset[i]
+#     # print(i, sample['rgb_image'].shape,sample['depth_image'].shape, sample['classes'].shape)
+#     print(i, sample['mask_image'].shape, sample['classes'].shape)
 
 
-dataloader = torch.utils.data.DataLoader(dataset, batch_size= 5, shuffle = True)
-print(dataloader)
+# dataloader = torch.utils.data.DataLoader(dataset, batch_size= 5, shuffle = True)
+# print(dataloader)
+
+
+# for batch_i , sample_batch in enumerate(dataloader):
+#     print(batch_i, sample_batch['mask_image'].size(), sample_batch['classes'].size)
