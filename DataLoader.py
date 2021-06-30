@@ -9,7 +9,7 @@ import numpy as np
 from skimage import io, transform
 from torchvision import transforms, utils
 
-
+torch.manual_seed(0)
 
 class COSD_Dataset_Loader(torch.utils.data.Dataset):
     def __init__(self, rgb_dir_path, depth_dir_path, csv_file_path, mask_dir_path = None, data_type = 'i', transform = None):
@@ -34,23 +34,19 @@ class COSD_Dataset_Loader(torch.utils.data.Dataset):
         # print(self.df.iloc[idx,0])
         rgb_img_path = os.path.join(self.rgb_dir,self.df.iloc[idx,0])
         depth_img_path = os.path.join(self.depth_dir,self.df.iloc[idx,1])
-        if self.data_type == 'o':
-            mask_img_path = os.path.join(self.mask_dir, self.df.iloc[idx,2])
-            mask_image = io.imread(fname= mask_img_path)
-
+        mask_img_path = os.path.join(self.mask_dir, self.df.iloc[idx,2])
+        
+        mask_image = io.imread(fname= mask_img_path)
         rgb_image = io.imread(fname= rgb_img_path)
         depth_image = io.imread(fname= depth_img_path)
         classified = self.df.iloc[idx,3:]
         classified = np.array([classified])
         
-        if self.data_type == 'i':
-            sample = {'rgb_image':rgb_image,
+        
+        sample = {'rgb_image':rgb_image,
                     'depth_image':depth_image,
+                    'mask_image':mask_image,
                     'classes':classified}
-
-        else: 
-            sample = {'mask_image':mask_image,
-                      'classes':classified}
 
         if self.transform:
             sample = self.transform(sample)
@@ -146,12 +142,21 @@ if os.path.isfile('train/csv_file.csv') == False:
                                 ,transparent_path= 'train/train_trans.txt'
                                 )
 
-# dataset = COSD_Dataset_Loader(rgb_dir_path= 'train/rgb'
-#                             , depth_dir_path= 'train/depth'
-#                             , csv_file_path= 'train/csv_file.csv'
-#                             , mask_dir_path= 'train/mask'
-#                             , data_type= 'o'
-#                             , transform = transforms.Compose([ToTensor()]))
+dataset_input = COSD_Dataset_Loader(rgb_dir_path= 'train/rgb'
+                            , depth_dir_path= 'train/depth'
+                            , csv_file_path= 'train/csv_file.csv'
+                            , mask_dir_path= 'train/mask'
+                            , data_type= 'i'
+                            , transform = transforms.Compose([ToTensor()]))
+
+dataset_output = COSD_Dataset_Loader(rgb_dir_path= 'train/rgb'
+                                    ,depth_dir_path= 'train/depth'
+                                    ,csv_file_path= 'train/csv_file.csv'
+                                    ,mask_dir_path= 'train/mask'
+                                    ,data_type= 'o'
+                                    ,transform= transforms.Compose([ToTensor()])
+)
+
 # print(dataset)
 # # print(len(dataset))
 # for i in range(3):
@@ -160,9 +165,15 @@ if os.path.isfile('train/csv_file.csv') == False:
 #     print(i, sample['mask_image'].shape, sample['classes'].shape)
 
 
-# dataloader = torch.utils.data.DataLoader(dataset, batch_size= 5, shuffle = True)
+dataloader_output = torch.utils.data.DataLoader(dataset_output, batch_size= 5, shuffle = True)
 # print(dataloader)
+dataloader_input = torch.utils.data.DataLoader(dataset_input, batch_size= 5, shuffle = True)
+
+for batch_i , sample_batch in enumerate(dataloader_output):
+    print(batch_i, sample_batch['mask_image'].size(), sample_batch['classes'].size)
+    break
 
 
-# for batch_i , sample_batch in enumerate(dataloader):
-#     print(batch_i, sample_batch['mask_image'].size(), sample_batch['classes'].size)
+for batch_i, sample_batch in enumerate(dataloader_input):
+    print(batch_i, sample_batch['rgb_image'].size(), sample_batch['depth_image'].size(), sample_batch['mask_image'].size(),sample_batch['classes'].size())
+    break
