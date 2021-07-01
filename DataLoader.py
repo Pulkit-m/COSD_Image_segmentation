@@ -169,11 +169,14 @@ dataloader_output = torch.utils.data.DataLoader(dataset_output, batch_size= 5, s
 # print(dataloader)
 dataloader_input = torch.utils.data.DataLoader(dataset_input, batch_size= 5, shuffle = True)
 
-for batch_i , sample_batch in enumerate(dataloader_output):
-    print(batch_i, sample_batch['mask_image'].size(), sample_batch['classes'].size)
-    break
+# for batch_i , sample_batch in enumerate(dataloader_output):
+#     print(batch_i, sample_batch['mask_image'].size(), sample_batch['classes'].size)
+#     break
 
 
 for batch_i, sample_batch in enumerate(dataloader_input):
     print(batch_i, sample_batch['rgb_image'].size(), sample_batch['depth_image'].size(), sample_batch['mask_image'].size(),sample_batch['classes'].size())
+    network_input = torch.cat((sample_batch['rgb_image'], sample_batch['depth_image']), dim = 1)
+    print(network_input.size())
+    #the python file is successfully working
     break
