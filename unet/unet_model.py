@@ -34,6 +34,8 @@ class UNet(nn.Module):
     def forward(self,rgb_batch, depth_batch):
         # rgb_batch , depth_batch = x,y
         combined_channel_input =  torch.cat((rgb_batch, depth_batch), dim= 1)   
+        if torch.cuda.is_available(): combined_channel_input = combined_channel_input.to(gtx)
+        print(combined_channel_input.size())
         #in: N,3,640,480  N,1,640,480        out: N,4,640,480
         x1 = self.down1(combined_channel_input)
         x2 = self.down2(x1)
@@ -51,7 +53,7 @@ class UNet(nn.Module):
         logits = self.outcome(x9)
         
 
-        if (True): #when not debugging set True to False
+        if (False): #when not debugging set True to False
             print(f'x1: {x1.size()}')
             print(f'x2: {x2.size()}')
             print(f'x3: {x3.size()}')
@@ -103,10 +105,20 @@ class UNet(nn.Module):
 #         return logits
 
 
+if torch.cuda.is_available():
+    print(f'GPU is available for usage')
+    device = "cuda:0"
+else: 
+    print(f'No GPU detected')
+
+gtx = torch.device(device)
+
+
 network = UNet()
+network.to(gtx)
 sample_input_rgb = torch.rand(size = (5, 3, 640, 480))
+# sample_input_rgb.to(gtx)
 sample_input_depth = torch.rand(size = (5,1,640,480))
-x =torch.cat((sample_input_depth,sample_input_rgb),dim = 1)
-print(x.size())
+# sample_input_depth.to(gtx)
 y_pred = network.forward(sample_input_rgb, sample_input_depth)
 print(y_pred.size())
