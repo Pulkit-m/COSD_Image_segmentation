@@ -76,7 +76,8 @@ class ToTensor(object):
             if len(shape) == 3:
                 image = sample[i].transpose((2,0,1))
             else:
-                image = sample[i].reshape( (1,480,640))
+                # image = sample[i].reshape( (1,480,640))
+                image = sample[i][np.newaxis,:,:]
                 image = np.array(image, dtype = np.int32)
 
             sample[i] = torch.from_numpy(image)
@@ -165,18 +166,19 @@ dataset_output = COSD_Dataset_Loader(rgb_dir_path= 'train/rgb'
 #     print(i, sample['mask_image'].shape, sample['classes'].shape)
 
 
-dataloader_output = torch.utils.data.DataLoader(dataset_output, batch_size= 5, shuffle = True)
-# print(dataloader)
-dataloader_input = torch.utils.data.DataLoader(dataset_input, batch_size= 5, shuffle = True)
+# dataloader_output = torch.utils.data.DataLoader(dataset_output, batch_size= 5, shuffle = True)
+# # # print(dataloader)
+# dataloader_input = torch.utils.data.DataLoader(dataset_input, batch_size= 5, shuffle = True)
 
-# for batch_i , sample_batch in enumerate(dataloader_output):
-#     print(batch_i, sample_batch['mask_image'].size(), sample_batch['classes'].size)
+# # for batch_i , sample_batch in enumerate(dataloader_output):
+# #     print(batch_i, sample_batch['mask_image'].size(), sample_batch['classes'].size)
+# #     break
+
+# print(len(dataset_input))
+
+# for batch_i, sample_batch in enumerate(dataloader_input):
+#     print(batch_i, sample_batch['rgb_image'].size(), sample_batch['depth_image'].size(), sample_batch['mask_image'].size(),sample_batch['classes'].size())
+#     network_input = torch.cat((sample_batch['rgb_image'], sample_batch['depth_image']), dim = 1)
+#     print(network_input.size())
+#     #the python file is successfully working
 #     break
-
-
-for batch_i, sample_batch in enumerate(dataloader_input):
-    print(batch_i, sample_batch['rgb_image'].size(), sample_batch['depth_image'].size(), sample_batch['mask_image'].size(),sample_batch['classes'].size())
-    network_input = torch.cat((sample_batch['rgb_image'], sample_batch['depth_image']), dim = 1)
-    print(network_input.size())
-    #the python file is successfully working
-    break
