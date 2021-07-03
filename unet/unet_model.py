@@ -5,18 +5,19 @@ import torch.optim as optim
 import math
 import os
 import torch.nn.functional as F
-from unet_parts import *
+from .unet_parts import *
 
 
 """ Full assembly of the parts to form the complete network """
 
 
 class UNet(nn.Module):
-    def __init__(self, n_channels_rgb = 3, n_channels_depth = 1, n_classes = 2):
+    def __init__(self, n_channels_rgb = 3, n_channels_depth = 1, n_classes = 2, enable_gpu = False):
         super(UNet, self).__init__()
         self.n_channels_rgb = n_channels_rgb
         self.n_channels_depth = n_channels_depth
         self.n_classes = n_classes
+        self.enable_gpu = enable_gpu
 
         self.down1 = DownSample(in_channels=4, out_channels = 64)
         self.down2 = DownSample(in_channels= 64, out_channels= 128)
@@ -34,7 +35,8 @@ class UNet(nn.Module):
     def forward(self,rgb_batch, depth_batch):
         # rgb_batch , depth_batch = x,y
         combined_channel_input =  torch.cat((rgb_batch, depth_batch), dim= 1)   
-        if torch.cuda.is_available(): combined_channel_input = combined_channel_input.to(gtx)
+        if self.enable_gpu and torch.cuda.is_available(): combined_channel_input = combined_channel_input.to(gtx)
+        combined_channel_input = nn.BatchNorm2d(num_features= 4)(combined_channel_input)
         print(combined_channel_input.size())
         #in: N,3,640,480  N,1,640,480        out: N,4,640,480
         x1 = self.down1(combined_channel_input)
@@ -105,20 +107,20 @@ class UNet(nn.Module):
 #         return logits
 
 
-if torch.cuda.is_available():
-    print(f'GPU is available for usage')
-    device = "cuda:0"
-else: 
-    print(f'No GPU detected')
+# if torch.cuda.is_available():
+#     print(f'GPU is available for usage')
+#     device = "cuda:0"
+# else: 
+#     print(f'No GPU detected')
 
-gtx = torch.device(device)
+# gtx = torch.device(device)
 
 
-network = UNet()
-network.to(gtx)
-sample_input_rgb = torch.rand(size = (5, 3, 640, 480))
-# sample_input_rgb.to(gtx)
-sample_input_depth = torch.rand(size = (5,1,640,480))
-# sample_input_depth.to(gtx)
-y_pred = network.forward(sample_input_rgb, sample_input_depth)
-print(y_pred.size())
+# network = UNet()
+# # network.to(gtx)
+# sample_input_rgb = torch.rand(size = (5, 3, 480, 640))
+# # sample_input_rgb.to(gtx)
+# sample_input_depth = torch.rand(size = (5,1,480, 640))
+# # # sample_input_depth.to(gtx)
+# y_pred = network.forward(sample_input_rgb, sample_input_depth)
+# print(y_pred.size())
