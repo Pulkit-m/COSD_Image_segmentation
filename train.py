@@ -18,6 +18,9 @@ import matplotlib
 import matplotlib.pyplot as plt 
 
 
+
+
+
 def dataset_train_test_split(dataset,split_ratio=0.15):
     """
         Returns a dictionary with keys 'train', 'val'
@@ -50,6 +53,9 @@ def visualizeData(dataset, index = 1, num = 3 ,show = False):
     
 
 def main():
+
+    # device = "cuda:0" if torch.cuda.is_available() else   #wont't work on my gpu
+
     #Generating a csv file for dataset
     if os.path.isfile('train/csv_file.csv') == False:
         Generate_csv_logs_for_images(column_names= ['rgb_names', 'depth_names', 'mask_names', 'Mirror','Transparent']
@@ -84,21 +90,27 @@ def main():
     #performing a sample forward pass and printing the output:
 
     trainData = torch.utils.data.DataLoader(dataset = trainDataset, batch_size= 3, shuffle= False)
-    network = UNet()
+    network = UNet(n_classes=3) 
+    optimizer = optim.Adam(network.parameters(),lr= 1e-4)
+    """although we have 2 classes but those classes are labelled as 1 and 2 in the mask images. 
+    So if n_classes =2 , loss function would by default consider 0 and 2, hence would give an out of bounds error"""
     for batch_i, batch in enumerate(trainData):
+        # batch = batch.to()
         rgb_batch = batch['rgb_image']/255
-        print(rgb_batch.size())
         depth_batch = batch['depth_image']/255
-        print(depth_batch.size())
-        mask_batch = batch['mask_image']
-
+        mask_batch = torch.squeeze(batch['mask_image'].type(torch.LongTensor))
         logits = network.forward(rgb_batch, depth_batch)
-        print(logits.size())
-        # print(logits[0])
         loss = nn.CrossEntropyLoss()
         output = loss(logits, mask_batch)
+
         print(output)
-        break
+        optimizer.zero_grad()
+        grad =  output.backward()   
+        optimizer.step()
+
+
+        if batch_i==4:
+            break
 
 
 
