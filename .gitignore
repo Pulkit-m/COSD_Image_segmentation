@@ -1,2 +1,5 @@
 .vscode
 unet/__pycache__
+__pycache__
+train/
+    

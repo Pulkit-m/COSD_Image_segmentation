@@ -39,7 +39,7 @@ class UNet(nn.Module):
         # rgb_batch , depth_batch = x,y
         combined_channel_input =  torch.cat((rgb_batch, depth_batch), dim= 1)   
         # if self.enable_gpu and torch.cuda.is_available(): combined_channel_input = combined_channel_input.to(self.device)
-        print('combined input' ,combined_channel_input)
+        # print('combined input' ,combined_channel_input)
         # combined_channel_input = nn.BatchNorm2d(num_features= 4)(combined_channel_input)
         combined_channel_input = self.NormalizeBatch(combined_channel_input)
 
